@@ -173,7 +173,7 @@ Errores de validación (400):
 ---
 
 
-## 7. Mejoras posibles (fuera del alcance de 3 horas)
+## 6. Mejoras posibles (fuera del alcance de 3 horas)
 
 - Usuario SQL de mínimo privilegio para la API en lugar de `sa`.
 - Refresh tokens y almacenamiento del token en cookie `HttpOnly`.
@@ -184,6 +184,6 @@ Errores de validación (400):
 
 ---
 
-## 9. Uso de herramientas de IA
+## 7. Uso de herramientas de IA
 
 Ver [HERRAMIENTAS_IA.md](HERRAMIENTAS_IA.md).
