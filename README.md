@@ -160,7 +160,23 @@ Errores de validación (400):
 
 ---
 
-## 5. Escenario de validación (paso a paso)
+## 5. Seguridad implementada
+
+| Requisito | Implementación |
+|---|---|
+| Contraseñas con hash + salt | `PasswordHasher<Usuario>` de ASP.NET Core Identity: PBKDF2-HMAC-SHA512, 100.000 iteraciones, salt aleatorio de 128 bits guardado dentro de `ContrasenaHash` |
+| Autenticación | JWT firmado con HMAC-SHA256 (`TokenServicio`); se valida emisor, audiencia, firma y expiración (60 min) |
+| Autorización en el backend | 1) **Rol**: `[Authorize(Roles = Roles.Administrador)]`; 2) **Propiedad del recurso**: un `Usuario` solo consulta sus propios menús (`UsuariosController.ObtenerMenus`); 3) **Menú asignado**: `GET /api/modules/{ruta}` consulta la BD en cada petición (`UsuarioRepositorio.TieneAccesoAMenuAsync`) |
+| No depender de ocultar la interfaz | Aunque el usuario escriba la URL o llame la API directamente, recibe **403** |
+| Respuestas de error claras y seguras | `ManejoErroresMiddleware` convierte las excepciones en códigos HTTP (400, 401, 403, 404, 409); el login responde con un mensaje genérico y los errores 500 no exponen detalles internos |
+| Validación de entrada | En tres niveles, con mensajes en español: formulario React (`lib/validations.js`), DTOs con DataAnnotations (`ValidacionEspanolExtensiones.cs`) y restricciones `CHECK`/`UNIQUE`/FK en SQL Server |
+| Inyección SQL | EF Core genera consultas parametrizadas |
+| Secretos | No hay credenciales reales; la contraseña de SQL Server y la clave JWT llegan por variables de entorno (`.env.example`) |
+| Contenedores | La API se ejecuta con un usuario sin privilegios (`USER app`) |
+
+---
+
+## 6. Escenario de validación (paso a paso)
 
 1. Abrir http://localhost:3000 e ingresar como **ana** → solo ve *Pólizas* y *Clientes*.
 2. Escribir en la barra la URL http://localhost:3000/modulo/siniestros → pantalla **403**. El botón *"Intentar acceso directo a la API"* muestra la respuesta real: `HTTP 403`.
@@ -172,8 +188,7 @@ Errores de validación (400):
 
 ---
 
-
-## 6. Mejoras posibles (fuera del alcance de 3 horas)
+## 7. Mejoras posibles (fuera del alcance de 3 horas)
 
 - Usuario SQL de mínimo privilegio para la API en lugar de `sa`.
 - Refresh tokens y almacenamiento del token en cookie `HttpOnly`.
@@ -184,6 +199,6 @@ Errores de validación (400):
 
 ---
 
-## 7. Uso de herramientas de IA
+## 8. Uso de herramientas de IA
 
 Ver [HERRAMIENTAS_IA.md](HERRAMIENTAS_IA.md).
