@@ -1,0 +1,71 @@
+### Pruebas rápidas (VS Code REST Client / Visual Studio)
+@api = http://localhost:5000
+
+### 1. Login admin
+# @name loginAdmin
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "nombreUsuario": "admin", "contrasena": "Admin123*" }
+
+### 2. Login ana
+# @name loginAna
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "nombreUsuario": "ana", "contrasena": "Ana12345*" }
+
+### 3. Catálogo de menús (cualquier usuario autenticado)
+GET {{api}}/api/menus
+Authorization: Bearer {{loginAna.response.body.token}}
+
+### 4. Ana consulta SUS menús (id 2) -> 200
+GET {{api}}/api/users/2/menus
+Authorization: Bearer {{loginAna.response.body.token}}
+
+### 5. Ana intenta ver los menús de Carlos (id 3) -> 403
+GET {{api}}/api/users/3/menus
+Authorization: Bearer {{loginAna.response.body.token}}
+
+### 6. Ana intenta listar usuarios (solo Administrador) -> 403
+GET {{api}}/api/users
+Authorization: Bearer {{loginAna.response.body.token}}
+
+### 7. Ana entra a Pólizas (asignado) -> 200
+GET {{api}}/api/modules/polizas
+Authorization: Bearer {{loginAna.response.body.token}}
+
+### 8. Ana intenta entrar a Siniestros (NO asignado) -> 403
+GET {{api}}/api/modules/siniestros
+Authorization: Bearer {{loginAna.response.body.token}}
+
+### 9. Sin token -> 401
+GET {{api}}/api/menus
+
+### 10. Admin crea usuario -> 201
+POST {{api}}/api/users
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "nombreCompleto": "Laura Ruiz", "nombreUsuario": "laura", "contrasena": "Laura1234", "rol": "Usuario" }
+
+### 11. Admin asigna menús a Ana (ids 1,2,4) -> 200
+PUT {{api}}/api/users/2/menus
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "idsMenus": [1, 2, 4] }
+
+### 12. Validaciones en español -> 400 con lista de errores
+POST {{api}}/api/users
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "nombreCompleto": "Al", "nombreUsuario": "jose maría", "contrasena": "abc", "rol": "Jefe" }
+
+### 13. JSON con tipo incorrecto -> 400 "El formato del dato enviado no es válido."
+PUT {{api}}/api/users/2/menus
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{ "idsMenus": ["uno"] }
